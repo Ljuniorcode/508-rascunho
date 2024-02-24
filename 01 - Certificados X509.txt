@@ -1,0 +1,196 @@
+X.509 é um formato padrão para certificados de chave pública;
+
+Usados em vários protocolos de segurança e aplicativos para verificar a identidade de indivíduos, dispositivos ou entidades em uma comunicação ou transação digital.
+
+Utilizados em vários protocolos de segurança, incluindo TLS (Transport Layer Security), 
+SSL (Secure Sockets Layer), Infraestrutura de Chave Pública (PKI) e assinaturas digitais.
+
+Componentes de um certificado
+- Nome diferenciado do assunto (DN): Isso identifica a entidade para a qual o certificado é emitido. Normalmente inclui informações como o nome da entidade, organização, país e muito mais.
+- Chave pública do assunto : A chave pública da entidade que está sendo certificada, que é usada para criptografia, assinaturas digitais e autenticação.
+DN do emissor do certificado : Isso identifica a entidade ou organização que emitiu o certificado.
+- Assinatura digital : Uma assinatura criptográfica gerada pelo emissor do certificado, que pode ser usada para verificar a autenticidade do certificado. Ele garante que o certificado não foi adulterado e foi realmente emitido por uma entidade confiável.
+- Período de validade : Os certificados X.509 têm uma data de início e término especificada, indicando o período durante o qual o certificado é considerado válido.
+- Número de série do certificado : Um identificador exclusivo para o certificado, normalmente emitido pela autoridade de certificação (CA).
+- Uso da chave: Informações que especificam os usos permitidos da chave pública, como criptografia, assinaturas digitais ou ambos.
+- Ramais de certificado: Isso pode incluir informações ou atributos adicionais, como nomes alternativos de assunto (SANs) para especificar vários nomes de organizadores, restrições de uso de chaves e muito mais.
+
+Etapas
+1 - Geração do certificado
+2 - Distribuição do certificado
+3 - Validação do certificado
+4 - Revogação de certificado
+5 - Renovação de certificado
+6 - Expiração de certificado
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+GERAÇÃO DE CHAVES - PRIVADA e PÚBLICA para CRIPTOGRAFAR e DESCRIPTOGRAFAR
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+Passo 1: Geração de chave privada
+Comando para gerar uma chave privada RSA criptografada com aes256 e salvando em chave-privada.pem
+O parâmetro -aes256 irá criptografar a chave privada com uma senha.
+openssl genpkey -algorithm RSA -out chave-privada.pem -aes256
+
+Passo 2: Geração de chave pública
+Gerar a chave pública correspondente à chave privada
+openssl rsa -in chave-privada.pem -out chave-publica.pem
+openssl rsa -in chave-privada.pem -pubout -out chave-publica.pem
+
+Passo 3: Verificação da chave privada
+verificando se a chave privada é válida e se está no formato certo
+openssl rsa -in chave-privada.pem -check
+
+Passo 4: Verificação da chave pública
+verificando se a chave pública é válida e se está no formato certo
+openssl rsa -in chave-publica.pem -pubin -check
+
+Passo 5: Criptografar um arquivo usando a chave pública
+openssl rsautl -encrypt -in arquivo.txt -inkey chave-publica.pem -pubin -out arquivocriptografado.txt
+
+Passo 6: Para descriptografar o arquivo criptografado usando a chave privada
+openssl rsautl -decrypt -in arquivo-criptografado.txt -inkey chave-privada.pem -out arquivo-descriptografado.txt
+------------------------------------------------------------------------------------
+------------------------------------ FIM -------------------------------------------
+------------------------------------------------------------------------------------
+
+
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+---------------- CRIAÇÃO DE UMA AUTORIDADE DE CERTIFICAÇÃO -------------------------
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+
+1. Crie uma chave privada para a CA:
+openssl genpkey -algorithm RSA -out ca-key.pem -aes256
+
+2. Crie um certificado para a CA. Será solicitado a fornecer informações sobre a CA
+openssl req -new -x509 -key ca-key.pem -out ca-cert.pem -days 365
+
+3. Verifique o certificado da CA
+openssl x509 -in ca-cert.pem -text -noout
+
+4. Operação de uma autoridade de certificação
+Emitir certificados digitais para indivíduos, organizações e dispositivos que desejam ser validados na internet
+
+4.1 - Crie uma chave privada para o usuário ou dispositivo que deseja obter um certificado
+openssl genpkey -algorithm RSA -out user-key.pem -aes256
+
+4.2 - Crie uma solicitação de assinatura de certificado (CSR) para o usuário ou dispositivo:
+obs: fornecer informações sobre o usuário ou dispositivo que deseja obter um certificado
+openssl req -new -key user-key.pem -out user-csr.pem
+
+4.3 - Assine a solicitação de certificado do usuário ou dispositivo usando a chave privada da CA:
+obs: Este comando assinará a solicitação de certificado do usuário ou dispositivo usando a chave privada da CA que você criou anteriormente.
+openssl x509 -req -in user-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out user-cert.pem -days 365
+
+5. Distribua o certificado para o usuário ou dispositivo:
+obs: Este comando criará um arquivo PKCS#12 contendo o certificado do usuário ou dispositivo, bem 
+como a chave privada associada e o certificado da CA.
+openssl pkcs12 -export -out user-cert.pfx -inkey user-key.pem -in user-cert.pem -certfile ca-cert.pem
+------------------------------------------------------------------------------------
+------------------------------------ FIM -------------------------------------------
+------------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+--- Solicitar, assinar e gerenciar certificados de servidor e cliente --------------
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+
+1. Crie uma chave privada para o servidor ou cliente
+obs: Os certificados de servidor são usados para autenticar servidores web e outros serviços na
+internet, enquanto os certificados de cliente são usados para autenticar clientes que desejam
+acessar esses serviços.
+openssl genpkey -algoritm RSA -out user-key.pem - aes256
+
+2. Crie uma solicitação de assinatura de certificado (CSR) para o servidor ou cliente:
+obs: você será solicitado a fornecer informações sobre o servidor ou cliente que deseja obter um certificado
+openssl req -new -key user-key.pem -out user-csr.pem
+
+3. Assinatura de certificados de servidor e cliente
+obs: Use a chave privada da CA para assinar a solicitação de certificado do servidor ou cliente
+openssl x509 -req -in user-csr.pem -CA ca-certificado.pem -CAkey ca-key.pem -CAcreateserial -out user-cert.pem -days 365
+
+comando usado para exportar/distribuir o certificado
+openssl pkcs12 -export -out user-cert.pfx -inkey user-key.pem -in user-cert.pem -certfile ca-cert.pem
+obs: exporta com extensão .pfx é como se tudo tivesse zipado nesse arquivo
+
+------------------------------------------------------------------------------------
+------------------------------------ FIM -------------------------------------------
+------------------------------------------------------------------------------------
+
+
+
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+------------- Autoridades de certificação e Revogar certificados-------------------
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+Certificados (CRL) é uma lista de certificados revogados que é publicada pela  autoridade de certificação (CA)  e usada por partes confiáveis para verificar a validade de um certificado.
+
+Revogar uma autoridade de certificação significa invalidar todos os certificados emitidos por essa CA.
+
+Iremos criar uma AC RAIZ e através dela criaremos outras ACs
+obs: AC Raiz ficará offline por segurança
+
+
+CERTIFICADOS DA AUTORIDADE CERTIFICADORA RAIZ
+Armazenar a chave da autoridade certificadora em um diretório seguro
+mkdir /root/ca
+mkdir certs crl csr newcerts private
+
+1. Comandos para criação da chave raiz
+criando chave
+openssl genrsa -aes256 -out private/ca.key.pem 4096
+
+2. Alterando permissão da chave para somente leitura
+chmod 400 private/ca.key.pem
+
+3. Criando certificado
+openssl req -config openssl.cnf \
+-key private/ca.key.pem \
+-new -x509 -days 7300 -sha256 -extensions v3_ca \
+-out certs/ca.cert.pem
+
+4. Checando o certificado criado
+openssl x509 -noout -text -in certs/ca.cert.pem
+
+
+5. Criando certificado intermediário, como se fosse uma nova AC intermediário
+mkdir /root/ca/intermediate
+mkdir certs crl csr newcerts private
+chmod 700 private
+touch index.txt
+echo 1000 > serial
+echo 1000 > /root/ca/intermediate/crlnumber
+
+6. Gerar nova chava para a AUTORIDADE CERTIFICADORA INTERMEDIÁRIA
+openssl genrsa -aes256 -out intermediate.key.pem 4096
+chmod 400 intermediate.key.pem
+
+7. Criar requisição do certificado intermediário
+openssl req -config intermediate/openssl.cnf -new -sha256 \
+> -key intermediate/private/intermediate.key.pem \
+> -out intermediate/csr/intermediate.csr.pem
+
+
+8. Usando openssl da AC raiz para criar o certificado intermediário
+openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
+> -days 3650 -notext -md sha256 \
+> -in intermediate/csr/intermediate.csr.pem \
+> -out intermediate/certs/intermediate.cert.pem
+
+------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
