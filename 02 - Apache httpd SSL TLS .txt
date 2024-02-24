@@ -1,0 +1,163 @@
+SSL (Secure Sockets Layer) e seu sucessor, TLS (Transport Layer Security), são protocolos
+criptográficos projetados para fornecer comunicação segura pela internet. Eles são comumente
+usados para proteger o tráfego da web, e-mail e outras comunicações de rede.
+
+Cifras são algoritmos usados para criptografar e descriptografar dados. Quando o SSL/TLS é
+usado para proteger uma conexão, uma suíte de cifras é negociada entre o cliente e o servidor,
+que especifica os algoritmos a serem usados para criptografia e autenticação.
+
+Algumas cifras SSL/TLS comuns incluem:
+• AES (Advanced Encryption Standard): Um algoritmo de criptografia simétrica amplamente
+usado e considerado seguro.
+• 3DES (Triple Data Encryption Standard): Um algoritmo de criptografia simétrica que
+usa três chaves para criptografia e agora é considerado menos seguro do que o AES.
+• RC4: Um algoritmo de criptografia simétrica que agora é considerado inseguro e não
+deve ser usado.
+• RSA (Rivest-Shamir-Adleman): Um algoritmo de criptografia assimétrica amplamente
+usado para troca de chaves e assinaturas digitais.
+
+SNI (Server name indication)
+Criado como uma extensão para o protocolo TLS, que é utilizado pelo HTTPS, tem o intuito
+de garantir que os dispositivos clientes consigam visualizar o certificado SSL específico para o
+site, pois está incluído na etapa de handshake TLS/SSL, permitindo configurar o hostname,
+ou nome do domínio, do site durante o handshake TLS, ou seja, a verificação ocorre antes da
+conexão HTTP.
+
+HSTS (HTTP Strict-Transport-Security)
+Indica para o navegador que a conexão com o site nunca deve ocorrer através HTTP, forçando
+o acesso somente via HTTPS. Dessa forma, é possível evitar sites que recebam conexões via
+HTTP e redirecionem para o HTTPS, pois primeiramente se comunicam com o HTTP, ou
+seja, sem criptografia, abrindo oportunidade para ataques man-in-the-middle.
+
+--------------------------------------------------------------------------------------------
+----------------------------- Apache HTTPD com mod_ssl -------------------------------------
+--------------------------------------------------------------------------------------------
+arquivo de teste /etc/apache2/sites-available/000-default.conf
+
+<VirtualHost *:80>
+        ServerName www.httpdteste.com
+        ServerAdmin webmaster@localhost
+        DocumentoRoot /var/www/html
+        ErrorLog /var/log/apache2/error.log
+        CustomLog /var/log/apache2/access.log combined
+</VirtualHost>
+
+
+1. carregando módulo ssl
+a2enmod ssl
+a2enmod headers
+
+2. Verificando se o módulo está carregado
+apache2ctl -M | grep nome-módulo
+
+3. Criando o diretório da AUTORIDADE CERTIFICADORA e sua estrutura
+mkdir /root/ca
+
+4. Criando a estrutura de diretórios
+cd /root/ca
+mkdir certs crl newcerts private
+
+5. Alterar permissão na pasta private
+chmod 700 private/
+
+6. Criando arquivos de controle e serial
+touch index.txt
+echo 1000 > serial
+
+7. criar o arquivo openssl.cnf e add as informações básicas
+obs: alterar linhas 81 a 86 (specify some defaults, país, cidade, email...)
+obs: verificar o caminho do diretório /root/ca ou /opt/ca ou /vcescolhe/ca
+
+8. Criar chave privada da CA e escolher uma senha
+openssl genrsa -aes256 -out private/ca.key.pem 4096
+alterar permissão de leitura para o dono chmod 400 private/ca.key.pem
+
+9. Criando o certificado da CA usando a chave privada, necessário digitar a senha da chave
+obs: não esquecer de digitar o common name: tech ca
+openssl req -config openssl.cnf -key private/ca.key.pem -new -x509 -days 7300 -sha256 -extensions v3_ca -out certs/ca.cert.pem
+
+10. Verificando se a requisição para criar o certificado usando a chave CA deu certo
+openssl x509 -noout -text -in certs/ca.cert.pe
+
+--------------------------------------------------------------------------------------------
+------------------------ Criando a estrutura do inermediate --------------------------------
+--------------------------------------------------------------------------------------------
+
+1. Criando estrutura de diretório, alterar permissões e criar arquivos de gerenciamento
+da cadeia de certificados
+mkdir /root/ca/intermediate
+cd /root/ca/intermediate
+mkdir certs crl csr newcerts private
+chmod 700 private/
+touch index.txt
+echo 1000 > serial
+echo 1000 > crl_number
+
+2. Criando a chave privada do intermediate CA
+openssl genrsa -aes256 -out private/intermediate.key.pem 4096
+
+3. Alterando permissões da chave
+chmod 400 private/intermediate.key.pem
+
+4. Criar CSR - requisição de assinatura de certificado
+openssl req -config intermediate/openssl.cnf -new -sha256 \
+-key intermediate/private/intermediate.key.pem \
+-out intermediate/csr/intermediate.csr.pem
+obs: alterar o common name: tech intermediate ca
+
+5. Criação do certificado, usar o CSR para assinar
+openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
+-days 3650 -notext -md sha256 \
+-in intermediate/csr/intermediate.csr.pem \
+-out intermediate/certs/intermediate.cert.pem
+
+6. Alterando permissões do certificado
+chmod 444 intermediate/certs/intermediate.cert.pem
+
+7. Verificando certificado
+openssl x509 -noout -text -in intermediate/certs/intermediate.cert.pem
+openssl verify -CAfile certs/ca.cert.pem intermediate/certs/intermediate.cert.pem
+
+8. Verificando cadeia de confiança
+cat intermediate/certs/intermediate.cert.pem certs/ca.cert.pem > intermediate/certs/ca-chain.cert.pem
+
+8.1 Alterando permissão
+chmod 444 intermediate/certs/ca-chain.cert.pem
+
+--------------------------------------------------------------------------------------------
+------- Criando chaves e certificados do cliente/intermediate ------------------------------
+--------------------------------------------------------------------------------------------
+1. Usando AC intermediate para criar novas chaves e certificados
+openssl genrsa -aes256 -out intermediate/private/www.httpdteste.com.key.pem 2048
+chmod 400 intermediate/private/www.httpdteste.com.key.pem
+
+2. Criando CSR requisição de assinatura com base na configuração do CA intermediate
+openssl req -config intermediate/openssl.cnf \
+-key intermediate/private/www.httpdteste.com.key.pem \
+-new -sha256 -out intermediate/csr/www.httpdteste.com.csr.pem
+obs: não esquecer de alterar o common name
+
+3. Assinando a requisição do certificado www.httpdteste.com.csr.pem
+openssl ca -config intermediate/openssl.cnf \
+> -in intermediate/csr/www.httpdteste.com.csr.pem \
+> -out intermediate/certs/www.httpdteste.com.cert.pem
+
+4. Copiar os certificados para /etc/ssl
+5. Cria uma copia do arquivo ss.conf por segurança
+cp default-ssl.conf default-ssl.conf.bkp
+6. Alterar o caminho do certificado dentro do arquivo 
+SSLCertificateFile /etc/ssl/www...cert.pem
+SSLCertificateKeyFile /etc/ssl/www...key.pem
+
+6.1 Ativar Suporte SNI
+
+
+
+
+
+
+
+
+
+
+
