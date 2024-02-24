@@ -127,7 +127,7 @@ obs: exporta com extensão .pfx é como se tudo tivesse zipado nesse arquivo
 
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
-------------- Autoridades de certificação e Revogar certificados-------------------
+------------------------ Autoridades de certificação--------------------------------
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 Certificados (CRL) é uma lista de certificados revogados que é publicada pela  autoridade de certificação (CA)  e usada por partes confiáveis para verificar a validade de um certificado.
