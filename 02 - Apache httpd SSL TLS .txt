@@ -148,14 +148,33 @@ cp default-ssl.conf default-ssl.conf.bkp
 6. Alterar o caminho do certificado dentro do arquivo 
 SSLCertificateFile /etc/ssl/www...cert.pem
 SSLCertificateKeyFile /etc/ssl/www...key.pem
-
-6.1 Ativar Suporte SNI
-
+SSLCertificateChainFile /etc/ssl/ca-chain...pem
 
 
+--------------------------------------------------------------------------------------------
+--------------------------- Outras Opções de segurança -------------------------------------
+--------------------------------------------------------------------------------------------
+Adicionar mais opções de segurança em: /etc/apache2/sites-available/default-ssl.conf
 
 
+# Ativar o suporte a SNI (Server Name Indication)
+SSLProtocol -all +TLSv1.2 +TLSv1.3
+SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
+SSLHonorCipherOrder on
+SSLSessionTickets off
 
+# Configurar HSTS (HTTP Strict Transport Security)
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+# Configurar outros cabeçalhos de segurança
+Header always set X-XSS-Protection "1; mode=block"
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+
+Ativar/habilitar as configurações
+a2ensite default-ssl.conf
+systemctl restart apache2
+obs: quando reiniciar, irá solicitar a senha
 
 
 
