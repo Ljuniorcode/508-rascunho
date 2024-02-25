@@ -176,6 +176,18 @@ a2ensite default-ssl.conf
 systemctl restart apache2
 obs: quando reiniciar, irá solicitar a senha
 
+--------------------------------------------------------------------------------------------
+Corrigindo erros 
+cp certs/ca.cert.pem /etc/ssl/certs/
+
+Alterando 
+/etc/apache2/sites-available/default-ssl.conf
+Add as linhas
+SSLVerifyClient require
+SSLCACertificateFile /etc/ssl/certs/ca.cert.pem
+
+
+
 
 
 

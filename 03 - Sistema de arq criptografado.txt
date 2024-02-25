@@ -1,0 +1,76 @@
+--------------------------------------------------------------------------------------------
+------------ m-crypt com LUKS1 para criptografar dispositivos de bloco-----------------------
+--------------------------------------------------------------------------------------------
+
+A criptografia de dispositivos de armazenamento de bloco é uma medida de segurança importante
+para proteger dados confidenciais de acesso não autorizado. Uma das maneiras mais
+comuns de criptografar dispositivos de bloco no Linux é usando o dm-crypt com LUKS1.
+
+Passo 1: Verifique o dispositivo de bloco
+lsblk - usado para listar os discos e suas partições
+blkid - usado para listar o UUID do disco atachado e tipo do sistema de arquivo
+
+Passo 2: Instale o pacote LUKS e o dm-crypt
+apt install cryptsetup
+
+Passo 3: Criptografar o dispositivo de bloco usando algoritmo de criptografia AES 
+com uma chave de 256 bits.
+Este comando iniciará o processo de formatação do dispositivo de bloco com LUKS. Você será
+solicitado a digitar uma senha para a criptografia.
+cryptsetup luksFormat /dev/sdb
+Digitar: YES
+Escolher uma senha
+
+Passo 3.1: Abrir o dispositivo criptografado
+cryptsetup luksOpen /dev/sdb seudiscocriptografado
+obs: digitar a senha que foi utilizada para criptografar
+
+O DISCO FICARÁ ACESSÍVEL EM /dev/mapper/seudiscocriptografado
+
+--------------------------------------------------------------------------------------------
+---------- Criar Sistema de arquivos, montar e desmontar dispositivo -----------------------
+--------------------------------------------------------------------------------------------
+Passo 1: Crie um sistema de arquivos no dispositivo criptografado
+mkfs.ext4 /dev/mapper/seudiscocriptografado
+
+Passo 2: Montar o dispositivo criptografado
+Criando ponto de montagem
+mkdir /mnt/seudiscocriptografado
+mount /dev/mapper/seudiscocriptografado /mnt/seudiscocriptografado
+
+Passo 3: Verificando se o disco está montado
+df -h
+
+Passo 4: Desmontar e fechar o dispositivo criptografado
+umount /mnt/seudiscocriptografado
+
+Passo 5: Fechar o dispositivo criptografado
+cryptsetup luksClose seudiscocriptografado
+
+Passo 6: Abrir o dispositivo
+cryptsetup luksOpen /dev/sdb discocriptografado
+
+Passo 7: Montar novamente o dispositivo para ter acesso aos arquivos
+mount /dev/mapper/seudiscocriptografado /mnt/seudiscocriptografad
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
