@@ -1,0 +1,20 @@
+Novo arquivo para teste /etc/bind/db.testaoseunome.com
+
+--------------------------------------------------------------
+$TTL            3600
+@       IN      SOA     testaoseunome.com. admin.testaoseunome.com. (
+                        2023052301 ; Serial
+                        3600 ; Refresh
+                        1800 ; Retry
+                        604800 ; Expire
+                        86400 ) ; Negative Cache TTL
+@                       IN       NS     testaoseunome.com.
+testaoseunome.com.        IN       A      192.168.0.x
+www.testaoseunome.com.    IN       A      192.168.0.x
+--------------------------------------------------------------
+
+named-checkconf - verifica se ocorreu algum erro em suas configurações
+named-checkzone testaoseunome.com /etc/bind/db.testaoseunome.com- checando as zonas
+
+Em caso de erros no status, desabilite o dnssec /etc/bind/named.conf.options
+dnssec-validation no;
