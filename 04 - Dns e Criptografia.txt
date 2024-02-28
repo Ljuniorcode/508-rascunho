@@ -18,3 +18,47 @@ named-checkzone testaoseunome.com /etc/bind/db.testaoseunome.com- checando as zo
 
 Em caso de erros no status, desabilite o dnssec /etc/bind/named.conf.options
 dnssec-validation no;
+
+Gerando uma chave de assinatura de zona
+dnssec-keygen -L 3600 -a RSASHA256 -b 2048 -K /etc/bind/ -n ZONE suanamezone.com
+
+Gerando uma ksk  para assinar a sua zona
+dnssec-keygen -L 3600 -a RSASHA256 -b 1024 -K /etc/bind/ -n ZONE -f KSK suanamezone.com
+
+Add as chaves na sua zona
+vi /etc/bind/suanamezone.com
+
+--------------------------------------------------------------
+
+Dicas do 'vi' para colar o conteúdo da chave dentro do arquivo enquanto estiver editando
+$ORIGIN suanamezone.com.0
+:r! cat nome-do-arquivo
+
+Assinando a zona com números randômicos e incrementos, é gerado um novo arquivo.
+dnssec-signzone -A -3 $(head -c 1000 /dev/random | sha1sum | cut -b 1-16) -K /etc/bind \
+-f /etc/bind/db.suanamezone.com.signed -N INCREMENT -o suanamezone.com. -t db.suanamezone.com
+
+alterando named.conf.local add 
+key-directory "/etc/bind/keys"
+
+alterar o arquivo named.conf.options
+dnssec-validation yes;
+
+copiar as chaves criadas para /etc/bind/keys
+
+criar arquivo vim /etc/apparmor.d/local/usr.sbin.named
+add as entradas
+/etc/bind/** rw,
+/etc/bind/keys/** rw,
+
+--------------------------------------------------------------
+
+reiniciar/reload
+rndc reload
+systemctl restart named.service 
+
+verificando configurações
+named-checkconf
+
+consultar o domínio
+dig DNSKEY @localhost 192.168.x.x +dnssec +multiline
