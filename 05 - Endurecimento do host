@@ -1,0 +1,34 @@
+Rascunhos
+
+Configurar a proteção de senha do grub2
+
+Passo 1. Gerar senha com hash para GRUB Este exemplo usa o seguinte
+grub-mkpasswd-pbkdf2
+
+Modificar /etc/grub.d/10_linux
+/etc/grub.d/10_linux, encontre a seguinte linha:
+
+echo "menuentry '$(echo "$title" | grub_quote)' ${CLASS} \$menuentry_id_option 'gnulinux-
+$version-$type-$boot_device_id' {" | sed "s/^/$submenu_indentation/"
+
+Adicionar --users '':
+echo "menuentry '$(echo "$title" | grub_quote)' ${CLASS} --users '' \$menuentry_id_option '
+gnulinux-$version-$type-$boot_device_id' {" | sed "s/^/$submenu_indentation/"
+
+Adicione proteção por senha a /etc/grub.d/40_custom
+set superuser="nome de usuário"
+password_pbkdf2 nome de usuário senha
+
+Gerar um arquivo de configuração do grub2
+update-grub2
+
+--------------------------------------------------------------------------------------------------------------------
+Desativar software e serviços não utilizados
+Passo 2. listar os serviços ativos, use o comando:
+systemctl list-unit-files --type=service
+systemctl list-unit-files --type=service --state=enabled
+
+Exemplo para desabilitar serviço
+systemctl disable cron.service
+systemctl disable bluetooth.service
+
