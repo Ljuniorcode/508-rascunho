@@ -32,3 +32,64 @@ Exemplo para desabilitar serviço
 systemctl disable cron.service
 systemctl disable bluetooth.service
 
+---------------------------------------------------------------------------------------------------
+
+Rascunho das Configuação de chaves
+Passo 1: Gerando chaves ssh pública e privada
+ssh-keygen -t rsa -f med 
+obs irá gerar 2 arquivos: media e med.pub
+obs poderá criar o par de chaves sem add nome, por padrão será criado id_rsa e id_rsa.pub
+
+Passo 2: Adicionar o arquivo da chave pública no host de destino
+diretório destino /etc/ssh/med.pub
+
+Passo 3: Dentro do host de destino alterar o arquivo /etc/ssh/sshd_config
+Adicionar o caminho da chave pública no final do arquivo
+TrusteduserCAKeys /etc/ssh/ca.pub
+
+Passo 4: Criar um par de chaves em um host cliente e enviar para o host 01
+Assinar a chave pública do cliente no host 01
+ssh-keygen -s chave-privada-host-01 -I cliente -n developers,ops,ubuntu -V +1w -z 1 chave-client.pub
+
+Passo 5: Verificando chave criada com assinatura
+ssh-keygen -Lf client-cert.pub
+
+Passo 6: Máquina cliente .ssh/id_rsa-cert.pub
+alterar a chave com o conteúdo da chave assinada no host 01
+
+Passo 7: alterar o .ssh/known_hosts na máquina cliente e testar o acesso
+@cert-authorty * copiar-a-chave-aqui....
+
+--------------------------------------------------------------------
+Chroot
+
+É um recurso do sistema operacional que cria um ambiente isolado, permitindo que um processo execute em 
+um diretório específico, limitando seu acesso ao resto do sistema.
+
+O chroot altera o diretório raiz para um subdiretório específico, limitando o acesso aos arquivos e 
+recursos fora desse diretório. 
+
+Isso é frequentemente usado em ambientes de desenvolvimento, virtualização, 
+contêineres e na execução de serviços, como servidores FTP
+
+Passo 1: Instalação de pacotes
+apt install debootstrap
+
+Passo 2: criar diretório para teste
+mkdir /tmp/chroot
+debootstrap --varian=minbase buster /tmp/chroot/
+obs: irá criar um subsistema dentro do diretório
+
+Passo 3: deixar disponível o mais próximo da realidade do host principal para o diretório /tmp
+mount --bind /dev/ /tmp/chroot/dev/
+mount --bind /proc/ /tmp/chroot/proc/
+mount --bind /sys/ /tmp/chroot/sys/
+
+Passo 4: acessando o sistema
+chroot /tmp/chroot
+testar com getent passwd
+
+Passo 5: desmontar as unidades
+umount /tmp/chroot/dev/
+umount /tmp/chroot/proc/
+umount /tmp/chroot/sys/
