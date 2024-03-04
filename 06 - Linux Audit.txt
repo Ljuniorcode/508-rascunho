@@ -1,0 +1,79 @@
+Linux audit - sistema de auditoria é composto por um conjunto de
+regras que definem quais eventos monitorar e um daemon que é executado 
+em segundo plano para capturar e armazenar eventos.
+
+Passo 1: Instalação do pacote
+sudo apt-get install auditd
+
+Arquivo de configuração de auditoria
+/etc/audit/auditd.conf
+
+A sintaxe para definir regras de observação
+auditctl -w path_to_file -p permissions -k key_name
+
+Para auditar as ações de criação do usuário, primeiro adicione um watch ao arquivo /etc/passwd
+para rastrear o acesso de gravação e alteração de atributo, e adicione uma chave personalizada
+para registrar todas as mensagens (essa chave personalizada é útil para filtrar mensagens de
+log):
+auditctl -w /etc/passwd -p wa -k user-modify
+
+Adicione um novo usuário
+useradd fulano
+
+Por padrão, auditd armazena logs no arquivo
+/var/log/audit/audit.log:
+cat /var/log/audit/audit.log | grep user-modify
+
+Exemplo de regra que monitora todas as exclusões de arquivo:
+alterar o arquivo /etc/audit/audit.rules
+-w /var/log -p wa -k logfile_changes
+
+Adicionar uma regra que monitora todas as tentativas de login
+malsucedidas
+auditctl -a always,exit -F arch=b64 -S open -S openat -F exit=-EACCES -k login_failures
+
+Visualizar os logs de auditoria usando o comando ausearch
+sudo ausearch -k logfile_changes
+
+Relatório de todos os eventos executáveis
+aureport -x
+
+Reiniciando o daemon de auditoria
+sudo systemctl restart auditd
+------------------------------------------------------------------------------------------------
+Exemplos dos principais ativos a serem auditados
+Reconnaissance
+-w /usr/bin/whoami -p x -k recon
+-w /etc/issue -p r -k recon
+-w /etc/hostname -p r -k recon
+
+Suspicious activity
+-w /usr/bin/wget -p x -k susp_activity
+-w /usr/bin/curl -p x -k susp_activity
+-w /usr/bin/base64 -p x -k susp_activity
+-w /bin/nc -p x -k susp_activity
+-w /bin/netcat -p x -k susp_activity
+-w /usr/bin/ncat -p x -k susp_activity
+-w /usr/bin/ssh -p x -k susp_activity
+-w /usr/bin/socat -p x -k susp_activity
+-w /usr/bin/wireshark -p x -k susp_activity
+-w /usr/bin/rawshark -p x -k susp_activity
+-w /usr/bin/rdesktop -p x -k sbin_susp
+
+Sbin suspicious activity
+-w /sbin/iptables -p x -k sbin_susp
+-w /sbin/ifconfig -p x -k sbin_susp
+-w /usr/sbin/tcpdump -p x -k sbin_susp
+-w /usr/sbin/traceroute -p x -k sbin_susp
+
+Injection
+-a always,exit -F arch=b32 -S ptrace -k tracing
+-a always,exit -F arch=b64 -S ptrace -k tracing
+-a always,exit -F arch=b32 -S ptrace -F a0=0x4 -k code_injection
+-a always,exit -F arch=b64 -S ptrace -F a0=0x4 -k code_injection
+-a always,exit -F arch=b32 -S ptrace -F a0=0x5 -k data_injection
+-a always,exit -F arch=b64 -S ptrace -F a0=0x5 -k data_injection
+-a always,exit -F arch=b32 -S ptrace -F a0=0x6 -k register_injection
+-a always,exit -F arch=b64 -S ptrace -F a0=0x6 -k register_injection
+
+------------------------------------------------------------------------------------------------
