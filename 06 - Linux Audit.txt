@@ -104,3 +104,38 @@ Habilitar verificação diária
 alterar a linha RUN_DAILY="false" para RUN_DAILY="true"
 
 ------------------------------------------------------------------------------------------------
+Rkhunter
+Visa proteger contra rootkits, backdoors, exploits, trojans e outros softwares maliciosos.
+Podemos modificar o arquivo de configuração principal do RKHunter para definir opções de verificação, 
+incluindo quais arquivos verificar, quais alertas gerar e quais técnicas de detecção usar.
+
+Instalação
+apt install rkhunter
+
+Arquivo de configuração
+/etc/rkhunter.conf
+alteração WEB_CMD="" e UPDATE_MIRRORS=1
+
+Algumas configurações importantes a serem consideradas são:
+• Defina a opção MAIL-ON-WARNING como yes se você deseja receber notificações por e-mail
+quando forem detectados avisos;
+• Defina a opção CRON_DAILY_RUN como yes se você quiser executar o rkhunter diariamente;
+• Descomente a opção SCRIPTWHITELIST e adicione quaisquer scripts que se sabe serem
+seguros;
+• Descomente a opção ALLOWHIDDENDIR se você tiver diretórios ocultos em seu sistema;
+• Descomente a opção ALLOWPROCDELFILE se você tiver um processo que exclui arquivos;
+• Descomente a opção ALLOWDEVFILE se você tiver um arquivo de dispositivo que não representa
+um risco de segurança;
+• Descomente a opção ALLOWIPCPROC se você tiver um processo que cria recursos de comunicação
+interprocessual (IPC);
+• Descomente a opção ALLOWSYSLOG se você quiser que o rkhunter verifique os arquivos
+syslog.
+
+Atualizando o arquivo de configuração /etc/rkhunter.conf
+rkhunter --update
+
+Atualizando a base de dados
+rkhunter --propupd
+
+Verificando warning, alteração de binários e etc.
+rkhunter --check --rwo
