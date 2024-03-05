@@ -77,3 +77,30 @@ Injection
 -a always,exit -F arch=b64 -S ptrace -F a0=0x6 -k register_injection
 
 ------------------------------------------------------------------------------------------------
+chkrootkit 
+É uma ferramenta de linha de comando que verifica um sistema em busca de rootkits
+conhecidos e outros comportamentos suspeitos, que podem indicar uma violação de segurança.
+
+Instalação
+apt-get install chkrootkit -y
+
+Verificando versão
+chrootkit -V
+
+Listar testes disponíveis
+chrootkit -l
+
+Executar o teste
+chrootkit
+
+Listar mensagens de saída com status infectado
+chkrootkit -q
+
+Verificando arquivos em um diretório específico
+chrootkit -r /opt/teste
+
+Habilitar verificação diária
+/etc/chkrootkit.conf
+alterar a linha RUN_DAILY="false" para RUN_DAILY="true"
+
+------------------------------------------------------------------------------------------------
