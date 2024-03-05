@@ -104,6 +104,7 @@ Habilitar verificação diária
 alterar a linha RUN_DAILY="false" para RUN_DAILY="true"
 
 ------------------------------------------------------------------------------------------------
+
 Rkhunter
 Visa proteger contra rootkits, backdoors, exploits, trojans e outros softwares maliciosos.
 Podemos modificar o arquivo de configuração principal do RKHunter para definir opções de verificação, 
@@ -139,3 +140,68 @@ rkhunter --propupd
 
 Verificando warning, alteração de binários e etc.
 rkhunter --check --rwo
+
+------------------------------------------------------------------------------------------------
+
+Malware detect
+
+O Linux Malware Detect (LMD) é uma ferramenta de segurança para sistemas operacionais
+Linux, que detecta e remove malwares de forma automatizada.
+
+Utiliza técnicas de análise heurística, assinaturas de malware, além de outras técnicas
+de detecção para identificar possíveis ameaças. Ele é capaz de detectar a maioria dos tipos de
+malwares, incluindo cavalos de Troia, vírus, worms e rootkits.
+
+Ele pode ser instalado em várias distribuições Linux, incluindo Ubuntu, Debian, CentOS, 
+Red Hat Enterprise Linux, Fedora e outras.
+
+A configuração do LMD é feita por meio de um arquivo de configuração que pode ser ajustado
+de acordo com as necessidades de cada usuário.
+
+Download do pacote
+cd /tmp
+wget http://www.rfxn.com/downloads/maldetect-current.tar.gz
+
+Descompactando o arquivo
+tar xfz maldetect-current.tar.gz
+
+Executar o script de instalação do pacote
+/tmp/maldetect-1.6.5
+./install.sh 
+
+Arquivo de configuração 
+/usr/local/maldetect/conf.maldet
+------------------------------------------------------------------------------------------------
+
+ClamAV
+
+Linux Malware Detect é compatível e funciona melhor com ClamAV (Clam Antivirus), especialmente
+ao verificar grandes conjuntos de arquivos. ClamAV é um mecanismo antivírus de código
+aberto para detectar vírus, malware e outros problemas de segurança comuns.
+
+Instalação 
+apt install clamav clamav-daemon clamdscan -y
+
+Parar o serviço clamav-freshclam 
+systemctl stop clamav-freshclam
+
+Atualizando base de dados 
+sudo freshclam
+
+Verifique a funcionalidade de teste do Linux Malware Detect 
+baixando amostras de assinaturas de vírus do site da EICAR.
+
+Baixar os arquivos
+wget https://secure.eicar.org/eicar.com
+wget https://secure.eicar.org/eicar_com.zip
+
+Usando o maldet em um diretório específico 
+maldet -a /diretorio
+obs: no final vc pode verificar o relatório...
+maldet --report 123456-0234.45654 (números de exemplo)
+
+Limpando os logs
+maldet -p
+
+Atualizando a base de dados
+maldet -u
