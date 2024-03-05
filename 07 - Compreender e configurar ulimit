@@ -1,0 +1,25 @@
+Limitar recursos de usuário e processos
+
+Verificando configurações atuais
+ulimit -a 
+
+Limites (soft e hard)
+
+O linux permite que vc abra no máximo 1024 arquivos
+ulimit -n 
+
+Alerando a configuração default de 1024 arquivos 
+ulimit -n 600 / voltar ao padrão: ulimit -n 1024 ou ulimit -f 1024
+
+Instalando pacote, testes com memória
+apt install memtester
+
+Consumir 4096MB de memoria
+memtester 2048 1
+
+
+Cgroups
+É um recurso do kernel do Linux que limita, contabiliza e isola
+o uso de recursos de uma coleção de processos... cpu, memória, largura de banda
+
+Diretório /sys/fs/cgroup
