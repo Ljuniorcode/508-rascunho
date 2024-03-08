@@ -1,0 +1,9 @@
+SUID (4000) - executa o arquivo como se fosse o root, usado em binários
+SGID (2000) - arquivos criado terão como dono seu usuário mas o grupo será herdado
+chown -r root.grupoescolhido diretoriox
+chmod 2770 diretoriox
+STICK BIT (1000) - somente quem criou pode apagar seus próprios arquivos
+
+add usuario ao grupo
+usermod -aG nome-grupo nome-do-usuario
+gpasswd -a nome-usuario nome-do-grupo

@@ -23,3 +23,12 @@ Cgroups
 o uso de recursos de uma coleção de processos... cpu, memória, largura de banda
 
 Diretório /sys/fs/cgroup
+
+Reiniciei os três serviços abaixo, nessa sequência.
+1. sisidsagent 
+2. sisipsutil 
+3. sisamddaemon 
+
+Proteção contra ações maliciosas na máquina
+SE - Linux
+Arquivos foram criados
