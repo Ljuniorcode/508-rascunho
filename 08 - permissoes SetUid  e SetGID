@@ -4,6 +4,15 @@ chown -r root.grupoescolhido diretoriox
 chmod 2770 diretoriox
 STICK BIT (1000) - somente quem criou pode apagar seus próprios arquivos
 
+Criar usuários
+adduser e useraddr
+
+Criar grupos
+groupadd seu-grupo
+
 add usuario ao grupo
 usermod -aG nome-grupo nome-do-usuario
 gpasswd -a nome-usuario nome-do-grupo
+------------------------------------------------------------------------------------------------
+Pesquisar por AppArmor e Smack
+
