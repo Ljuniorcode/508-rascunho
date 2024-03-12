@@ -1,0 +1,70 @@
+SUID (4000) - executa o arquivo como se fosse o root, usado em binários
+SGID (2000) - arquivos criado terão como dono seu usuário mas o grupo será herdado
+chown -r root.grupoescolhido diretoriox
+chmod 2770 diretoriox
+STICK BIT (1000) - somente quem criou pode apagar seus próprios arquivos
+
+Criar usuários
+adduser e useraddr
+
+Criar grupos
+groupadd seu-grupo
+
+add usuario ao grupo
+usermod -aG nome-grupo nome-do-usuario
+gpasswd -a nome-usuario nome-do-grupo
+------------------------------------------------------------------------------------------------
+Free Radius
+Provê autenticação, autorização e contabilidade (accounting)
+Seu desenho modular é fácil de entender, permitindo facilmente a inclusão ou remoção de módulos sem contudo afetar o desempenho, os requisitos de hardware, de memória ou a segurança do sistema.
+
+Passo 1: Instalação de pacotes, máquina cliente, ubuntu.
+aptitude install libpam0g-dev -y
+aptitude install libgcrypt20-dev -y
+aptitude install pam-radius-auth -y
+
+Passo 2: Instalação de pacotes no servidor onde irá rodar o FreeRadius
+aptitude install freeradius -y
+
+Passo 3: Arquivo de configuração
+/etc/freeradius/3.0/radius.conf
+
+Passo 4: Arquivo clients.conf, qual o ip do host que ele irá escutar
+Exemplo de configuração: /etc/freeradius/3.0/clients.conf
+client 192.168.x.x {
+    secret = add-aqui-a-senha
+}
+
+Passo 5: O sistema precisa reconhecer quem é o usuário
+Exemplo de configuração: /etc/freeradius/3.0/users
+add o nome no final do arquivo
+fulano Cleartext-Password := "add-aqui-a-senha"
+Reply-Message := "Hello, %{User-Name}"
+
+Passo 6: Reiniciar serviço
+systemctl restart freeradius.service
+
+Passo 7: editar o pam na máquina client, ubuntu
+aptitude install pam-radius-auth -y
+aptitude install libpam-radius-auth -y
+/etc/pam_radius_auth.conf
+#servidor    senha             timeout
+192.168.x.x add-aqui-a-senha      1
+
+Passo 8: alterar permissões
+chown root /etc/pam_radius_auth.conf
+chmod go-rwx /etc/pam_radius_auth.conf ou chmod 600 /etc/pam_radius_auth.conf
+
+Passo 9: Alterar o pam.d/common-auth
+/etc/pam.d/common-auth
+auth sufficient pam_radius_auth.so
+
+Passo 10: Criar o usuário fulano sem senha
+useradd fulano --create-home -d /home/linux
+
+Passo 11: Reiniciar serviço
+systemctl restart freeradius.service
+
+Passo 12: Testar o serviço
+ssh fulano@ip-do-servidor
+
