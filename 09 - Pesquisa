@@ -24,3 +24,24 @@ https://books.google.com.br/
 
 Finanças
 https://www.google.com/finance/?hl=pt
+
+Item 2: Intermediário e Avançado
+Pesquisa avançada
+https://www.google.com.br/advanced_search
+
+Dorks - operador:valor
+https://www.exploit-db.com/google-hacking-database
+
+Dorks Intext & Filetype
+Intext: o termo está no texto
+filetype: identifica o tipo de arquivo específico
+
+Dorks Site & Inurl
+Busca resultados em determinado site
+site:nomesite.com.br
+inrul busca um termo que está na url da página alvo
+inurl:barcos
+
+
+
+
