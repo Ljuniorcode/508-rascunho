@@ -42,6 +42,15 @@ site:nomesite.com.br
 inrul busca um termo que está na url da página alvo
 inurl:barcos
 
+Dorks Intitle & Link
+Intitle irá fazer buscas no título do documento
+Exemplo
+intitle: login - painel
+intitle: index of /
+link - descobrindo quem está direcionando para o site x
+link:x.com
 
-
-
+Dorks Boleanas (" " ; NOT; AND; OR... )
+obs: nome, email e cpfs entre aspas duplas
+site:*dominio.com.br
+carros AND motos; carros OR motos
